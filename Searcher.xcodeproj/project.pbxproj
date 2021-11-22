@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		453D1F3C274A1E3800329B1D /* NothingFoundCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D1F3B274A1E3800329B1D /* NothingFoundCell.swift */; };
+		455AFDD1274ACE2100364B59 /* LoadingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455AFDD0274ACE2100364B59 /* LoadingCell.swift */; };
 		45A9DDC727497A5C00A01210 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A9DDC627497A5C00A01210 /* SearchResult.swift */; };
 		45A9DDCC27498A1300A01210 /* SearcherResultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A9DDCB27498A1300A01210 /* SearcherResultCell.swift */; };
 		45DA916D274931B900E0ABD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DA916C274931B900E0ABD4 /* AppDelegate.swift */; };
@@ -19,6 +20,7 @@
 
 /* Begin PBXFileReference section */
 		453D1F3B274A1E3800329B1D /* NothingFoundCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NothingFoundCell.swift; sourceTree = "<group>"; };
+		455AFDD0274ACE2100364B59 /* LoadingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCell.swift; sourceTree = "<group>"; };
 		45A9DDC627497A5C00A01210 /* SearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		45A9DDCB27498A1300A01210 /* SearcherResultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearcherResultCell.swift; sourceTree = "<group>"; };
 		45DA9169274931B900E0ABD4 /* Searcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Searcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				45A9DDCB27498A1300A01210 /* SearcherResultCell.swift */,
+				455AFDD0274ACE2100364B59 /* LoadingCell.swift */,
 				453D1F3B274A1E3800329B1D /* NothingFoundCell.swift */,
 			);
 			path = Cells;
@@ -187,6 +190,7 @@
 				45A9DDCC27498A1300A01210 /* SearcherResultCell.swift in Sources */,
 				453D1F3C274A1E3800329B1D /* NothingFoundCell.swift in Sources */,
 				45DA916D274931B900E0ABD4 /* AppDelegate.swift in Sources */,
+				455AFDD1274ACE2100364B59 /* LoadingCell.swift in Sources */,
 				45A9DDC727497A5C00A01210 /* SearchResult.swift in Sources */,
 				45DA916F274931B900E0ABD4 /* SceneDelegate.swift in Sources */,
 			);
