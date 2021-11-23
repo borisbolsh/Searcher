@@ -11,7 +11,7 @@ class LoadingCell: UITableViewCell {
 
     static let identifier = "LoadingCell"
     
-    private let loadingLabel: UILabel = {
+    private lazy var loadingLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .center
@@ -25,8 +25,6 @@ class LoadingCell: UITableViewCell {
         let activityIV = UIActivityIndicatorView(style: .medium)
         activityIV.translatesAutoresizingMaskIntoConstraints = false
         activityIV.startAnimating()
-        activityIV.tag = 99
-        
         return activityIV
     }()
     

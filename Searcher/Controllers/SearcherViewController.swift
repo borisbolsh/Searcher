@@ -12,6 +12,8 @@ final class SearcherViewController: UIViewController {
     private var searchResults = [SearchResult]()
     private var hasSearched = false
     private var isLoading = false
+    private var dataTask: URLSessionDataTask?
+    
     
     struct TableView {
         struct CellIdentifiers {
@@ -23,11 +25,22 @@ final class SearcherViewController: UIViewController {
     
     // MARK: - UI
     
-    private lazy var searchBar: UISearchBar = {
+    private var searchBar: UISearchBar = {
         let sb = UISearchBar()
         sb.translatesAutoresizingMaskIntoConstraints = false
+        sb.placeholder = "Artist name, song or album..."
         
         return sb
+    }()
+    
+    private var segmentedControl: UISegmentedControl = {
+        let items = ["All", "Music", "Software", "Books"]
+        let sc = UISegmentedControl(items: items)
+        sc.translatesAutoresizingMaskIntoConstraints = false
+        sc.selectedSegmentIndex = 0
+        sc.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
+        
+        return sc
     }()
     
     private lazy var tableView: UITableView = {
@@ -42,36 +55,40 @@ final class SearcherViewController: UIViewController {
     
     
     // MARK: - Lifecycle
-    
-    override func loadView() {
-        super.loadView()
-        setup()
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
         self.view.backgroundColor = .systemBackground
+        self.title = "Searcher"
         searchBar.becomeFirstResponder()
+        setup()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
+    @objc func segmentChanged(_ segmentedControl: UISegmentedControl) {
+        performSearch()
     }
     
     // MARK: - Helper Methods
-    func iTunesURL(searchText: String) -> URL {
+    func iTunesURL(searchText: String, category: Int) -> URL {
+        let kind: String
+        switch category {
+            case 1: kind = "musicTrack"
+            case 2: kind = "software"
+            case 3: kind = "ebook"
+            default: kind = ""
+        }
         let encodedText = searchText.addingPercentEncoding(
             withAllowedCharacters: CharacterSet.urlQueryAllowed)!
-        let urlString = String(format: "https://itunes.apple.com/search?term=%@&limit=200", encodedText)
+        let urlString = "https://itunes.apple.com/search?" +
+              "term=\(encodedText)&limit=200&entity=\(kind)"
         let url = URL(string: urlString)
         return url!
-    }
-    
-    func performStoreRequest(with url: URL) -> Data? {
-        do {
-            return try Data(contentsOf:url)
-        } catch {
-            print("Download Error: \(error.localizedDescription)")
-            showNetworkError()
-            return nil
-        }
     }
     
     func parse(data: Data) -> [SearchResult] {
@@ -110,6 +127,7 @@ extension SearcherViewController {
         searchBar.delegate = self
         
         view.addSubview(searchBar)
+        view.addSubview(segmentedControl)
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -119,7 +137,12 @@ extension SearcherViewController {
             searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             searchBar.heightAnchor.constraint(equalToConstant: 50),
             
-            tableView.topAnchor.constraint(equalTo: searchBar.safeAreaLayoutGuide.bottomAnchor),
+            segmentedControl.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
+            //            segmentedControl.heightAnchor.constraint(equalToConstant: 50),
+            
+            tableView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 10),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
@@ -152,10 +175,6 @@ extension SearcherViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(
                 withIdentifier: TableView.CellIdentifiers.loadingCell,
                 for: indexPath) as! LoadingCell
-            
-//            let spinner = cell.viewWithTag(99) as!
-//            UIActivityIndicatorView
-//             spinner.startAnimating()
             return cell
         } else if searchResults.count == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: TableView.CellIdentifiers.nothingFoundCell, for: indexPath) as! NothingFoundCell
@@ -165,16 +184,25 @@ extension SearcherViewController: UITableViewDelegate, UITableViewDataSource {
             
             let searchResult = searchResults[indexPath.row]
             
-            cell.configure(with: SearchResult(artistName: searchResult.artistName, trackName: searchResult.trackName))
-            //      cell.nameLabel.text = searchResult.name
-            //      cell.artistNameLabel.text = searchResult.artistName
-            
+            cell.configure(for: searchResult)
+           
             return cell
         }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+       
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let vc = DetailViewController()
+        vc.modalPresentationStyle = .overFullScreen
+       
+        vc.searchResult = {
+            var name = "Test"
+        }
+        
+//        navigationController?.pushViewController(vc, animated: true)
+        present(vc, animated: true)
     }
     
     
@@ -197,32 +225,45 @@ extension SearcherViewController: UISearchBarDelegate {
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        
+        performSearch()
+    }
+    
+    func performSearch() {
         if !searchBar.text!.isEmpty {
             searchBar.resignFirstResponder()
             
+            dataTask?.cancel()
             isLoading = true
             tableView.reloadData()
             
             hasSearched = true
             searchResults = []
             
-            let queue = DispatchQueue.global()
-            let url = self.iTunesURL(searchText: searchBar.text!)
-            
-            queue.async {
-               if let data = self.performStoreRequest(with: url) {
-                 self.searchResults = self.parse(data: data)
-                 self.searchResults.sort(by: <)
-                    
-                 DispatchQueue.main.async {
-                   self.isLoading = false
-                   self.tableView.reloadData()
-                 }
-
-                 return
-               }
+            let url = iTunesURL(searchText: searchBar.text!, category: segmentedControl.selectedSegmentIndex)
+            let session = URLSession.shared
+            let dataTask = session.dataTask(with: url) {data, response,
+                error in
+                if let error = error as NSError?, error.code == -999 {
+                    return  // Search was cancelled
+                } else if let data = data {
+                    self.searchResults = self.parse(data: data)
+                    self.searchResults.sort(by: <)
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.tableView.reloadData()
+                    }
+                    return
+                } else {
+                    print("Failure! \(response!)")
+                }
+                DispatchQueue.main.async {
+                    self.hasSearched = false
+                    self.isLoading = false
+                    self.tableView.reloadData()
+                    self.showNetworkError()
+                }
             }
+            dataTask.resume()
         }
         
         

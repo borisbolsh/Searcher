@@ -8,10 +8,11 @@
 import UIKit
 
 final class SearcherResultCell: UITableViewCell {
-
-    static let identifier = "SearcherResultCell"
     
-    private let artistImageView: UIImageView = {
+    static let identifier = "SearcherResultCell"
+    var downloadTask: URLSessionDownloadTask?
+    
+    private lazy var artistImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = 4
@@ -20,28 +21,28 @@ final class SearcherResultCell: UITableViewCell {
         return imageView
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .left
         label.font = .systemFont(ofSize: 18, weight: .regular)
         return label
     }()
-
-    private let artistNameLabel: UILabel = {
+    
+    private lazy var artistNameLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .left
         label.font = .systemFont(ofSize: 15, weight: .regular)
         return label
     }()
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-       
+        
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureLayout()
     }
-
+    
     func configureLayout() {
         contentView.addSubview(artistImageView)
         contentView.addSubview(nameLabel)
@@ -77,15 +78,28 @@ final class SearcherResultCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-//        artistImageView.image = nil
-        nameLabel.text = nil
-        artistNameLabel.text = nil
+        downloadTask?.cancel()
+        downloadTask = nil
     }
     
-    func configure(with model: SearchResult) {
-//        artistImageView.image = nil
-        nameLabel.text = model.name
-        artistNameLabel.text = model.artistName
+    func configure(for result: SearchResult) {
+        nameLabel.text = result.name
+        
+        if result.artist.isEmpty {
+            artistNameLabel.text = "Unknown"
+        } else {
+            artistNameLabel.text = String(format: "%@ (%@)", result.artist, result.type)
+        }
+        
+        artistImageView.image = UIImage(systemName: "square")
+        if let smallURL = URL(string: result.imageSmall) {
+            downloadTask = artistImageView.loadImage(url: smallURL)
+        }
     }
+    
+    
+    
     
 }
+
+
