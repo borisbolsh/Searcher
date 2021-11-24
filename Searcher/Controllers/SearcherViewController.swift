@@ -13,7 +13,7 @@ final class SearcherViewController: UIViewController {
     private var hasSearched = false
     private var isLoading = false
     private var dataTask: URLSessionDataTask?
-    
+    private var landscapeVC: LandscapeViewController?
     
     struct TableView {
         struct CellIdentifiers {
@@ -70,6 +70,22 @@ final class SearcherViewController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
+    override func willTransition(
+        to newCollection: UITraitCollection,
+        with coordinator: UIViewControllerTransitionCoordinator
+      ) {
+        super.willTransition(to: newCollection, with: coordinator)
+
+        switch newCollection.verticalSizeClass {
+        case .compact:
+          showLandscape(with: coordinator)
+        case .regular, .unspecified:
+          hideLandscape(with: coordinator)
+        @unknown default:
+          break
+        }
+      }
+    
     @objc func segmentChanged(_ segmentedControl: UISegmentedControl) {
         performSearch()
     }
@@ -115,6 +131,42 @@ final class SearcherViewController: UIViewController {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+    
+    func showLandscape(with coordinator: UIViewControllerTransitionCoordinator) {
+       guard landscapeVC == nil else { return }
+       landscapeVC = LandscapeViewController()
+       if let controller = landscapeVC {
+         controller.searchResults = searchResults
+         controller.view.frame = view.bounds
+         controller.view.alpha = 0
+         view.addSubview(controller.view)
+         addChild(controller)
+         coordinator.animate(
+           alongsideTransition: { _ in
+             controller.view.alpha = 1
+             self.searchBar.resignFirstResponder()
+             if self.presentedViewController != nil {
+               self.dismiss(animated: true, completion: nil)
+             }
+           }, completion: { _ in
+             controller.didMove(toParent: self)
+           })
+       }
+     }
+    
+    func hideLandscape(with coordinator: UIViewControllerTransitionCoordinator) {
+        if let controller = landscapeVC {
+          controller.willMove(toParent: nil)
+          coordinator.animate(
+            alongsideTransition: { _ in
+              controller.view.alpha = 0
+            }, completion: { _ in
+              controller.view.removeFromSuperview()
+              controller.removeFromParent()
+              self.landscapeVC = nil
+            })
+        }
+      }
     
 }
 
@@ -183,7 +235,7 @@ extension SearcherViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: TableView.CellIdentifiers.searcherResultCell, for: indexPath) as! SearcherResultCell
             
             let searchResult = searchResults[indexPath.row]
-            
+         
             cell.configure(for: searchResult)
            
             return cell
@@ -197,9 +249,9 @@ extension SearcherViewController: UITableViewDelegate, UITableViewDataSource {
         let vc = DetailViewController()
         vc.modalPresentationStyle = .overFullScreen
        
-        vc.searchResult = {
-            var name = "Test"
-        }
+        vc.searchResult = { [weak self] in
+            self?.searchResults[indexPath.row]
+        }()
         
 //        navigationController?.pushViewController(vc, animated: true)
         present(vc, animated: true)

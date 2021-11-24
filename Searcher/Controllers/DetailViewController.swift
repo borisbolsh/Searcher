@@ -9,7 +9,8 @@ import UIKit
 
 final class DetailViewController: UIViewController {
     
-    var searchResult: (()->())?
+    var searchResult: SearchResult?
+    var downloadTask: URLSessionDownloadTask?
     
     // MARK: - UI
     private var newView: UIView = {
@@ -27,7 +28,7 @@ final class DetailViewController: UIViewController {
         closeBtn.contentEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         closeBtn.setImage(UIImage(systemName: "xmark.circle.fill") , for: .normal)
         closeBtn.addTarget(self, action: #selector(closeWindow), for: .touchUpInside)
-    
+        
         return closeBtn
     }()
     
@@ -93,12 +94,14 @@ final class DetailViewController: UIViewController {
         price.contentEdgeInsets = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
         price.setTitle("9.99$", for: .normal)
         price.setTitleColor(.systemBlue, for: .normal)
-  
+        
         price.contentEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         price.backgroundColor = .clear
         price.layer.cornerRadius = 5
         price.layer.borderWidth = 1
         price.layer.borderColor = UIColor.systemBlue.cgColor
+        price.addTarget(self, action: #selector(openInStore), for: .touchUpInside)
+        
         return price
     }()
     
@@ -109,13 +112,68 @@ final class DetailViewController: UIViewController {
         
         view.backgroundColor = UIColor(named: "ArtistName")
         setup()
+        
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(closeWindow))
+        gestureRecognizer.cancelsTouchesInView = false
+        gestureRecognizer.delegate = self
+        view.addGestureRecognizer(gestureRecognizer)
+        
+        if searchResult != nil {
+            updateUI()
+        }
     }
     
-  
+    deinit {
+      print("deinit \(self)")
+      downloadTask?.cancel()
+    }
+    
     // MARK: - Actions
     @objc func closeWindow() {
-//        navigationController?.popViewController(animated: true)
+        //        navigationController?.popViewController(animated: true)
+    
         dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func openInStore() {
+        if let url = URL(string: searchResult!.storeURL) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+    
+    // MARK: - Helper Methods
+    func updateUI() {
+        nameLabel.text = searchResult?.name
+        
+        if ((searchResult?.artist.isEmpty) != nil) {
+            artistNameLabel.text = "Unknown"
+        } else {
+            artistNameLabel.text = searchResult?.artist
+        }
+        
+        kindLabel.text = searchResult?.type
+        genreLabel.text = searchResult?.genre
+        
+        // Show price
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = searchResult!.currency
+        
+        let priceText: String
+        if searchResult?.price == 0 {
+            priceText = "Free"
+        } else if let text = formatter.string(from: searchResult?.price as! NSNumber) {
+            priceText = text
+        } else {
+            priceText = ""
+        }
+        
+        priceButton.setTitle(priceText, for: .normal)
+        
+        // Get image
+        if let largeURL = URL(string: searchResult!.imageLarge) {
+          downloadTask = artworkImageView.loadImage(url: largeURL)
+        }
     }
 }
 
@@ -143,15 +201,21 @@ extension DetailViewController {
             
             artworkImageView.topAnchor.constraint(equalTo: closeBtn.bottomAnchor),
             artworkImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            artworkImageView.heightAnchor.constraint(equalToConstant: 100),
-            artworkImageView.widthAnchor.constraint(equalToConstant: 100),
+            artworkImageView.heightAnchor.constraint(equalToConstant: 80),
+            artworkImageView.widthAnchor.constraint(equalToConstant: 80),
             
-            modalInfoStackView.topAnchor.constraint(equalTo: artworkImageView.bottomAnchor),
+            modalInfoStackView.topAnchor.constraint(equalTo: artworkImageView.bottomAnchor, constant: 8),
             modalInfoStackView.leadingAnchor.constraint(equalTo: newView.leadingAnchor,constant: 16),
             modalInfoStackView.trailingAnchor.constraint(equalTo: newView.trailingAnchor, constant: -10),
             
-            priceButton.topAnchor.constraint(equalTo: modalInfoStackView.bottomAnchor),
+            priceButton.bottomAnchor.constraint(equalTo: newView.bottomAnchor, constant: -16),
             priceButton.trailingAnchor.constraint(equalTo: newView.trailingAnchor, constant: -16),
         ])
+    }
+}
+
+extension DetailViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        return (touch.view === self.view)
     }
 }
