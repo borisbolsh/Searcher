@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		45151796274CC7010062F1E7 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45151795274CC7010062F1E7 /* DetailViewController.swift */; };
+		45357AD727500DF7007AABA5 /* Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45357AD627500DF7007AABA5 /* Search.swift */; };
 		453D1F3C274A1E3800329B1D /* NothingFoundCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D1F3B274A1E3800329B1D /* NothingFoundCell.swift */; };
 		455AFDD1274ACE2100364B59 /* LoadingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455AFDD0274ACE2100364B59 /* LoadingCell.swift */; };
 		45A302FC274E1C5F00E26AEA /* LandscapeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A302FB274E1C5F00E26AEA /* LandscapeViewController.swift */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		45151795274CC7010062F1E7 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		45357AD627500DF7007AABA5 /* Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Search.swift; sourceTree = "<group>"; };
 		453D1F3B274A1E3800329B1D /* NothingFoundCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NothingFoundCell.swift; sourceTree = "<group>"; };
 		455AFDD0274ACE2100364B59 /* LoadingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCell.swift; sourceTree = "<group>"; };
 		45A302FB274E1C5F00E26AEA /* LandscapeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandscapeViewController.swift; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				45A9DDC627497A5C00A01210 /* SearchResult.swift */,
+				45357AD627500DF7007AABA5 /* Search.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -203,6 +206,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45357AD727500DF7007AABA5 /* Search.swift in Sources */,
 				45151796274CC7010062F1E7 /* DetailViewController.swift in Sources */,
 				45DA9171274931B900E0ABD4 /* SearcherViewController.swift in Sources */,
 				45A302FC274E1C5F00E26AEA /* LandscapeViewController.swift in Sources */,

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ResultArray: Codable {
+class ResultArray: Codable {
     var resultCount = 0
     var results = [SearchResult]()
 }

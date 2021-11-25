@@ -13,6 +13,7 @@ final class SearcherViewController: UIViewController {
     private var hasSearched = false
     private var isLoading = false
     private var dataTask: URLSessionDataTask?
+    
     private var landscapeVC: LandscapeViewController?
     
     struct TableView {
